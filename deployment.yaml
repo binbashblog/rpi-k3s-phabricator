@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: phabricator
+  name: phabricator
+  labels:
+    app: phabricator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phabricator
+  template:
+    metadata:
+      labels:
+        app: phabricator
+    spec:
+      containers:
+      - name: phabricator
+        image: bitnami/phabricator:latest
+        ports:
+        - containerPort: 8082
+        resources:
+          limits:
+            cpu: 2
+            memory: 8Gi
+        env:
+          - name: APACHE_HTTP_PORT_NUMBER
+            value: '8082'
+          - name: PHABRICATOR_HOST
+            value: 'HOSTNAME'
+          - name: PHABRICATOR_USERNAME
+            value: 'admin'
+          - name: PHABRICATOR_PASSWORD
+            value: 'phabricator'
+          - name: MARIADB_HOST
+            value: '127.0.0.1'
+          - name: MARIADB_USER
+            value: 'root'
+          - name: MARIADB_PASSWORD
+            value: 'password'
+          - name: PHP_MEMORY_LIMIT
+            value: '1024M'
+        volumeMounts:
+          - name: phabricator-data-pvc
+            mountPath: /bitnami
+        livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - curl -s 'https://HOSTNAME/status/' | grep -i "ALIVE" > /dev/null
+            initialDelaySeconds: 300
+            timeoutSeconds: 10
+            failureThreshold: 3
+            periodSeconds: 60
+      - name: phabricator-mariadb
+        image: bitnami/mariadb:latest
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            cpu: 2
+            memory: 8Gi
+        env:
+          - name: MARIADB_ROOT_PASSWORD
+            value: 'password'
+          - name: MARIADB_EXTRA_FLAGS
+            value: '--local-infile=0 --sql_mode=STRICT_ALL_TABLES --skip-name-resolve --max_allowed_packet=1073741824 --net_buffer_length=1048576 --innodb-buffer-pool-size=4096M'
+        volumeMounts:
+          - name: phabricator-mariadb-pvc
+            mountPath: /bitnami
+      volumes:
+      - name: phabricator-data-pvc
+        persistentVolumeClaim:
+          claimName: phabricator-data-pvc
+      - name: phabricator-mariadb-pvc
+        persistentVolumeClaim:
+          claimName: phabricator-mariadb-pvc

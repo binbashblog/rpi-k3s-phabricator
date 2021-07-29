@@ -1,0 +1,32 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: phabricator
+  name: phabricator-data-pvc
+spec:
+  selector:
+    matchLabels:
+      name: phabricator-data-pv
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: phabricator
+  name: phabricator-mariadb-pvc
+spec:
+  selector:
+    matchLabels:
+      name: phabricator-mariadb-pv
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

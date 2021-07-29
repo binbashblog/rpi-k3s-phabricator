@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: phabricator
+  name: phabricator-svc
+spec:
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 8082
+      targetPort: 8082
+  selector:
+    app: phabricator

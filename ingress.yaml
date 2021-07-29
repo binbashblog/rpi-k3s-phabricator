@@ -1,0 +1,32 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: phabricator
+  name: phabricator-ing
+spec:
+  tls:
+  - hosts:
+    - HOSTNAME
+    secretName: SECRET
+  rules:
+  - host: phabricator
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: phabricator-svc
+            port: 
+              number: 8082
+  - host: phabricator.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: phabricator-svc
+            port: 
+              number: 8082
